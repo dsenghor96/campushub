@@ -5,10 +5,11 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { PageResponse } from '../model/page-response.model';
 import { EtudiantRequest, EtudiantResponse } from '../model/etudiant-api.interface';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' }) // @Service aussi marche
 export class EtudiantService {
-  private apiUrl = 'http://localhost:8080/api/etudiants';
+  private apiUrl = `${environment.apiUrl}/etudiants`;
   private http = inject(HttpClient);
 
   getById(id: number): Observable<EtudiantResponse> {

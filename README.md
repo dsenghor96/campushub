@@ -1,70 +1,33 @@
-# campushub
+# CampusHub
 
-Exercie Jour 1:
-1- Dans un projet SpringBoot simple, modéliser Etudiant, Cours, Inscription (records), puis avec les Streams : moyenne d'âge, groupement par filière, top 3 par note. Ajouter 3 tests JUnit 5. Livrable : PR mergée avec code + tests verts. Validation : historique Git propre.
+## Installation
+### Prérequis
+- JDK 17+
+- Node 20+
+- Docker
 
-# 🌿 Convention de nommage des branches
-Nous utilisons le modèle standard basé sur les branches **main/master**, **develop** et les branches secondaires :
-
-```
-main/master        → code en production
-develop            → code validé & en attente de recette
-feature/...        → nouvelles fonctionnalités
-bugfix/...         → corrections non urgentes
-hotfix/...         → correctifs urgents pour production
-release/vX.Y.Z     → stabilisation avant déploiement
-```
-
-Utilisez le format suivant :
-```
-<type>/<initiales>/<slug>
-```
-Exemples :
-- `feature/adama/auth-ldap`
-- `bugfix/youssouf/dashboard`
-
-# 📝 Convention de commit 
-[Documentation](https://www.conventionalcommits.org/en/v1.0.0/#specification)
-
-Format :
-```text
-<type>(<scope>): <message court>
-
-Description (optionnelle)
-
-Closes: #<ticket> (optionnel)
-```
-**Types autorisés :**
-
-- `feat` : nouvelle fonctionnalité
-- `fix` : correction de bug
-- `docs` : documentation
-- `style` : formatage / lint
-- `refactor` : refactoring sans changement de comportement
-- `test` : ajout / modification de tests
-- `chore` : maintenance (scripts, dépendances...)
-
-**Exemples :**
+### Lancer en local
 ```bash
-git commit -m "feat(auth): support LDAP
-
-Closes: #245"
+docker compose up
 ```
+Application disponible sur http://localhost:4200  
+Swagger UI sur http://localhost:8080/swagger-ui.html
 
-## 3. Pull Request
+## Architecture
+Le projet CampusHub est structuré autour d'un backend Spring Boot modulaire exposant une API REST sécurisée, adossé à une base de données PostgreSQL, et consommé par une application frontend Angular. Le tout est conteneurisé via Docker.
 
-### 🎯 Avant de créer la PR :
-- La branche est **poussée** : `git push origin feature/...`
-- Le pipeline CI/CD est **vert** (tests, build, qualité)
-- Les **tests unitaires** et **tests de non-régression** sont validés
+## Modules
 
-### 🛠 Création de la PR :
-- Cible : **source** = notre branche, **destination** = `develop`
-- Titre clair : `feat(auth): support LDAP via AD`
-- Description structurée :
-    - 📋 Objet de la PR
-    - ✅ Checklist :
-        - [x] Code testé localement
-        - [x] Tests unitaires ajoutés
-        - [x] Documentation à jour
-    - 🧪 Scénarios testés
+- **Étudiants** (G2) — CRUD complet (`/api/etudiants`) avec pagination, tri, et validation stricte des DTOs (`@NotBlank`, `@Email`, etc.). La lecture est accessible à tous, tandis que l'écriture est réservée au rôle administrateur. Le module est packagé via son propre Dockerfile.
+- **Cours & Inscriptions** (G3) — Gestion des cours et des inscriptions (relation *many-to-many*). Implémentation basée sur une architecture 3 couches, traitements analytiques via l'API Stream de Java (moyenne d'âge, statistiques), et documentation Swagger. La sécurisation des routes d'écriture est assurée par JWT.
+- **Persistance** (G4) — Stockage relationnel PostgreSQL articulé sur 4 tables principales (étudiants, cours, inscriptions avec attributs, et utilisateurs). L'évolution du schéma est versionnée et automatisée par Flyway (migrations V1 à V8), assurant la fiabilité des déploiements. Le modèle de données est documenté dans `docs/schema.md`.
+- **Sécurité** (G5) — Authentification centralisée par JWT (via `jjwt`) et hachage de mots de passe par BCrypt. Le contrôle d'accès s'effectue par rôle (ADMIN / ETUDIANT) via `@PreAuthorize`. Les réponses d'erreur sont normalisées (401/403) et l'ensemble est couvert par des tests d'intégration sécurisés.
+- **Frontend Core** (G6) — Conception du socle réactif Angular (Signals, composants standalone) et intégration HTTP des données paginées avec gestion complète des états (chargement, erreur, succès). Sécurisation de l'interface par rôles (RBAC), validation par tests unitaires (Vitest), et livraison d'un Dockerfile multi-stage optimisé sous Nginx avec routing SPA.
+- **Frontend Formulaires & Auth** (G7) — Implémentation du parcours utilisateur : routing applicatif, formulaires réactifs pour l'administration (avec validation client/serveur), et gestion de l'état (Signals). L'authentification est gérée via un `AuthService`, avec un intercepteur HTTP pour l'injection du token et des *guards* pour protéger les vues.
+- **CI/CD & Déploiement** (G8) — Mise en place et automatisation du pipeline CI/CD avec GitHub Actions (build et tests du backend et du frontend). Gestion de la conteneurisation Docker, configuration du déploiement continu, et sécurisation des variables d'environnement pour assurer la fiabilité de l'application en production.
+
+## Lien Swagger en production
+*https://campushub-web.onrender.com/swagger-ui/index.html*
+
+## Déploiement
+*https://campushub-web.onrender.com/actuator/health*

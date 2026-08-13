@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { LoginRequest, AuthResponse } from '../model/auth.interface';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -27,7 +28,7 @@ export class AuthService {
 
   login(credentials: LoginRequest): Observable<AuthResponse> {
     return this.http
-      .post<AuthResponse>('http://localhost:8080/api/auth/login', credentials)
+      .post<AuthResponse>(`${environment.apiUrl}/auth/login`, credentials)
       .pipe(
         // tap stocke la session sans modifier la réponse qui continue vers le composant
         tap(response => this.stockerSession(response))

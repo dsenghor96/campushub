@@ -25,7 +25,7 @@ export class EtudiantListComponent implements OnInit {
 
   pageActuelle = signal(0);
   taillePage = 4;
-
+  totalPages = signal(0);
   ngOnInit() {
     this.chargerEtudiants();
   }
@@ -35,6 +35,7 @@ export class EtudiantListComponent implements OnInit {
       next: (data) => {
         this.etudiants.set(data.content);
         this.loading.set(false);
+        this.totalPages.set(data.totalPages)
       },
       error: (err) => {
         this.erreur.set('Impossible de charger les étudiants');
@@ -66,7 +67,7 @@ onSupprimer(id: number) {
 
   pageSuivante() {
     this.pageActuelle.update(p => {
-      if(p < (this.etudiants().length / this.taillePage)) {
+      if(p < this.totalPages() - 1) {
         return p + 1;
       }
       return p;
